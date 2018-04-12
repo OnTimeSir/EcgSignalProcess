@@ -5,7 +5,7 @@ QUEUE_ARRAY *CreateQueue(WORD max)
 {
 	QUEUE_ARRAY *queue = NULL;
 	WORD i;
-	queue= (QUEUE_ARRAY*)malloc(sizeof(QUEUE_ARRAY));
+	queue = (QUEUE_ARRAY*)malloc(sizeof(QUEUE_ARRAY));
 	queue->array = (ElementType*)malloc(sizeof(ElementType)*max);
 	if (queue->array == NULL)
 	{
@@ -14,7 +14,7 @@ QUEUE_ARRAY *CreateQueue(WORD max)
 	}
 	else
 	{
-		queue->rear = max-1;  //队尾索引
+		queue->rear = max - 1;  //队尾索引
 		queue->maxSize = max; //队列大小
 		for (i = 0; i < max; i++)
 		{
@@ -76,10 +76,10 @@ void FreeNode(NODE_INDEX *nodeIdx)
 
 INPUT_TYPE RrsFilter(const INPUT_TYPE input, QUEUE_ARRAY* forward, QUEUE_ARRAY* backward, NODE_INDEX *nodeIdx)
 {
-	INPUT_TYPE xSum = input - (forward->array[nodeIdx->xDelay1]<<1) + forward->array[nodeIdx->xDelay2];
-	INPUT_TYPE ySum = (backward->array[nodeIdx->yDelay1]<<1) - backward->array[nodeIdx->yDelay2];
+	INPUT_TYPE xSum = input - (forward->array[nodeIdx->xDelay1] << 1) + forward->array[nodeIdx->xDelay2];
+	INPUT_TYPE ySum = (backward->array[nodeIdx->yDelay1] << 1) - backward->array[nodeIdx->yDelay2];
 	INPUT_TYPE tmpOut = xSum + ySum;
-	INPUT_TYPE outPut = forward->array[nodeIdx->xFP] - (tmpOut >>RRS_SHIFT_LENGTH);
+	INPUT_TYPE outPut = forward->array[nodeIdx->xFP] - (tmpOut >> RRS_SHIFT_LENGTH);
 	RefreshQueue(forward, input);
 	RefreshQueue(backward, tmpOut);
 	UpdateNode(nodeIdx);
@@ -116,59 +116,56 @@ INPUT_TYPE IfirFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff1, QUEUE_ARRAY* b
 		}
 		else
 		{
-			tmpRst += buff1->array[idx] * coeff1[FIR_1ST_LENGTH -i-1];
+			tmpRst += buff1->array[idx] * coeff1[FIR_1ST_LENGTH - i - 1];
 		}
 		idx = (idx + buff1->maxSize - 1) % buff1->maxSize;
 	}
-	tmpOut = (INPUT_TYPE)(tmpRst >> INPUT_FRECTION_BIT);
+	tmpOut = (INPUT_TYPE)(tmpRst >> FIR_COEFF_FRECTION_BIT);
 
 	tmpRst = 0;
 	idx = buff2->rear;
 	for (i = 0; i < FIR_2ND_LENGTH; i++)
 	{
-		if (i < (FIR_2ND_LENGTH >> 1)+1)
+		if (i < (FIR_2ND_LENGTH >> 1) + 1)
 		{
 			tmpRst += buff2->array[idx] * coeff2[i];
 		}
 		else
 		{
-			tmpRst += buff2->array[idx] * coeff2[FIR_2ND_LENGTH -i-1];
+			tmpRst += buff2->array[idx] * coeff2[FIR_2ND_LENGTH - i - 1];
 		}
 		idx = (idx + buff2->maxSize - INTERP_FACTOR) % buff2->maxSize;
 	}
-	outPut = (INPUT_TYPE)(tmpRst >> INPUT_FRECTION_BIT);
+	outPut = (INPUT_TYPE)(tmpRst >> FIR_COEFF_FRECTION_BIT);
 
 	RefreshQueue(buff1, input);
 	RefreshQueue(buff2, tmpOut);
 	return outPut;
 }
 
-OUTPUT_TYPE SignalProcess(const INPUT_TYPE inputData, QUEUE_ARRAY* rrsBuf1, QUEUE_ARRAY* rrsBuf2, NODE_INDEX* nodeIdx, QUEUE_ARRAY*ifirBuf1, QUEUE_ARRAY*ifirBuf2, const LPF_INTFC* fir1Coeff, const LPF_INTFC* fir2Coeff)
+INPUT_TYPE firFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff, const LPF_INTFC* coeff)
 {
-	OUTPUT_TYPE outputData = 0;
-	INPUT_TYPE tmpOut = 0;
+	INPUT_TYPE outPut = 0;
+	long long tmpRst = 0; //64bit
+	WORD idx = 0;
+	WORD i = 0;
 
-	//高通&&陷波
-	//tmpOut = RrsFilter(inputData, rrsBuf1, rrsBuf2, nodeIdx);
-	tmpOut = RrsFilterFloatAmp(inputData, rrsBuf1, rrsBuf2, nodeIdx);
 
-	//低通
-	tmpOut = IfirFliter(tmpOut, ifirBuf1, ifirBuf2, fir1Coeff, fir2Coeff);
-
-	//取16位输出，溢出保护
-	tmpOut = tmpOut >> (INPUT_FRECTION_BIT-OUTPUT_FRECTION_BIT);
-	if (tmpOut > OUTPUT_MAX_VALUE)
+	idx = buff->rear;
+	for (i = 0; i < LPF_LENGTH; i++)
 	{
-		outputData = OUTPUT_MAX_VALUE;
+		if (i < (LPF_LENGTH >> 1))
+		{
+			tmpRst += buff->array[idx] * coeff[i];
+		}
+		else
+		{
+			tmpRst += buff->array[idx] * coeff[LPF_LENGTH - i - 1];
+		}
+		idx = (idx + buff->maxSize - 1) % buff->maxSize;
 	}
-	else if (tmpOut < OUTPUT_MIN_VALUE)
-	{
-		outputData = OUTPUT_MIN_VALUE;
-	}
-	else
-	{
-		outputData = (OUTPUT_TYPE)tmpOut;
-	}
-	return outputData;
+	outPut = (INPUT_TYPE)(tmpRst >> FIR_COEFF_FRECTION_BIT);
+	RefreshQueue(buff, input);
+	return outPut;
 }
 

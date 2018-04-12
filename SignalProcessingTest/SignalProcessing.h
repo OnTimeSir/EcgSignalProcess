@@ -11,8 +11,11 @@
 #define FIR_2ND_LENGTH 31
 #define INTERP_FACTOR 2
 
-#define INPUT_FRECTION_BIT 15
-#define OUTPUT_FRECTION_BIT 12 //范围【-8~+8】
+#define LPF_LENGTH 72
+
+#define INPUT_FRECTION_BIT 12
+#define OUTPUT_FRECTION_BIT 10 
+#define FIR_COEFF_FRECTION_BIT 15
 
 #define OUTPUT_MAX_VALUE 32767
 #define OUTPUT_MIN_VALUE -32768
@@ -24,7 +27,7 @@ typedef short OUTPUT_TYPE;  //输出
 typedef short LPF_INTFC;    //低通系数
 
 typedef INPUT_TYPE ElementType;
-typedef struct _QUEUE_ARRAY_ 
+typedef struct _QUEUE_ARRAY_
 {
 	WORD rear;
 	WORD maxSize;
@@ -42,14 +45,19 @@ typedef struct _NODE_INDEX_
 
 
 //信号处理接口函数
-OUTPUT_TYPE SignalProcess(const INPUT_TYPE inputData, QUEUE_ARRAY* rrsBuf1, QUEUE_ARRAY* rrsBuf2, NODE_INDEX* nodeIdx, QUEUE_ARRAY*ifirBuf1, QUEUE_ARRAY*ifirBuf2, const LPF_INTFC* fir1Coeff, const LPF_INTFC* fir2Coeff);
 
 //整系数递归高通&&工频陷波
-INPUT_TYPE RrsFilter(const INPUT_TYPE input, QUEUE_ARRAY* forward, QUEUE_ARRAY* backward, NODE_INDEX *nodeIdx);
-INPUT_TYPE RrsFilterFloatAmp(const INPUT_TYPE input, QUEUE_ARRAY* forward, QUEUE_ARRAY* backward, NODE_INDEX *nodeIdx);
+INPUT_TYPE RrsFilter(const INPUT_TYPE input, QUEUE_ARRAY* forward, QUEUE_ARRAY* backward, NODE_INDEX *nodeIdx);         //仅+/- 移位操作
+INPUT_TYPE RrsFilterFloatAmp(const INPUT_TYPE input, QUEUE_ARRAY* forward, QUEUE_ARRAY* backward, NODE_INDEX *nodeIdx); //1次浮点乘法
 
 //2级fir级联结构的低通滤波
 INPUT_TYPE IfirFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff1, QUEUE_ARRAY* buff2, const LPF_INTFC* coeff1, const LPF_INTFC* coeff2);
+
+//fir Direct-Form
+INPUT_TYPE firFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff, const LPF_INTFC* coeff);
+
+//iir Direct-II (1-order)
+
 
 QUEUE_ARRAY *CreateQueue(WORD max);
 void RefreshQueue(QUEUE_ARRAY *queue, ElementType data);

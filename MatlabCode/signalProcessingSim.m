@@ -41,11 +41,11 @@ for i=1:dataLen
    backBuf = [backBuf(2:end);tmpOut]; 
    
    tmpOut = int32(bitshift(int64(sum(firCoeff1.*firBuf1(end:-1:1))),-15));
-   filteredSig(i) = int32(bitshift(int64(sum(firCoeff2.*firBuf2(end:-2:1))),-18));
+   filteredSig(i) = int32(bitshift(int64(sum(firCoeff2.*firBuf2(end:-2:1))),-17));
    firBuf1 = [firBuf1(2:end);rrsOut(i)]; 
    firBuf2 = [firBuf2(2:end);tmpOut];  
 
 end
-outPut = single(filteredSig)./2^12;
+outPut = single(filteredSig)./2^10;
 hold on;plot(outPut);
 

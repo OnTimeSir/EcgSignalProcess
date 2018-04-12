@@ -110,7 +110,7 @@ INPUT_TYPE IfirFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff1, QUEUE_ARRAY* b
 	idx = buff1->rear;
 	for (i = 0; i < FIR_1ST_LENGTH; i++)
 	{
-		if (i < (FIR_1ST_LENGTH >> 1)+1)
+		if (i < (FIR_1ST_LENGTH >> 1))
 		{
 			tmpRst += buff1->array[idx] * coeff1[i];
 		}
@@ -126,7 +126,7 @@ INPUT_TYPE IfirFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff1, QUEUE_ARRAY* b
 	idx = buff2->rear;
 	for (i = 0; i < FIR_2ND_LENGTH; i++)
 	{
-		if (i < (FIR_2ND_LENGTH >> 1))
+		if (i < (FIR_2ND_LENGTH >> 1)+1)
 		{
 			tmpRst += buff2->array[idx] * coeff2[i];
 		}

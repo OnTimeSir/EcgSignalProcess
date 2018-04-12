@@ -10,8 +10,8 @@ int main()
 	INPUT_TYPE rawEcgData[DATA_LENGTH] = { 0 };//输入
 	OUTPUT_TYPE filteredEcgData[DATA_LENGTH] = { 0 };//输出结果
 
-	LPF_INTFC fir1Coeff[(FIR_1ST_LENGTH >> 1) + 1] = { 0 };
-	LPF_INTFC fir2Coeff[FIR_2ND_LENGTH >> 1] = { 0 };
+	LPF_INTFC fir1Coeff[(FIR_1ST_LENGTH >> 1)] = { 0 };
+	LPF_INTFC fir2Coeff[(FIR_2ND_LENGTH >> 1) + 1] = { 0 };
 	QUEUE_ARRAY* rrsBuf1 = NULL;
 	QUEUE_ARRAY* rrsBuf2 = NULL;
 	QUEUE_ARRAY* ifirBuf1 = NULL;
@@ -36,7 +36,7 @@ int main()
 	err = fopen_s(&fileIn2, "firCoeff1.dat", "rb");
 	if (err == 0)
 	{
-		fread(fir1Coeff, sizeof(LPF_INTFC), (FIR_1ST_LENGTH >> 1) + 1, fileIn2);
+		fread(fir1Coeff, sizeof(LPF_INTFC), (FIR_1ST_LENGTH >> 1), fileIn2);
 		fclose(fileIn2);
 	}
 	else
@@ -47,7 +47,7 @@ int main()
 	err = fopen_s(&fileIn3, "firCoeff2.dat", "rb");
 	if (err == 0)
 	{
-		fread(fir2Coeff, sizeof(LPF_INTFC), (FIR_2ND_LENGTH >> 1), fileIn3);
+		fread(fir2Coeff, sizeof(LPF_INTFC), (FIR_2ND_LENGTH >> 1)+1, fileIn3);
 		fclose(fileIn3);
 	}
 	else

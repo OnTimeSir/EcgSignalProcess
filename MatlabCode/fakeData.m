@@ -30,7 +30,7 @@ fid = fopen('..\SignalProcessingTest\rawECG.dat','wb');
 fwrite(fid,fix_noiseECG,'int32');
 fclose(fid);
 
-Fpass = 41;          % Passband Frequency
+Fpass = 37;          % Passband Frequency
 Fstop = 49;          % Stopband Frequency
 Dpass = 0.005;       % Passband Ripple
 Dstop = 0.002;       % Stopband Attenuation

@@ -8,14 +8,14 @@ fid  = fopen('..\SignalProcessingTest\firCoeff2.dat', 'rb');
 firCoeff2 = fread(fid, 'int16');
 fclose(fid);
 
-
-% rawECG = int32(raw(1:50000));
-Fs = 250;
-Fp = 40;
-A = 1;
-rawECG = A.*sin(2*pi*Fp*(0:49999)./Fs+pi/2)';
-qpath = quantizer('fixed','round','saturate',[24,15]);
-rawECG = int32(quantize(qpath,rawECG).*2^15);
+dataLen = 5000;
+rawECG = int32(raw(1:dataLen));
+% Fs = 250;
+% Fp = 40;
+% A = 1;
+% rawECG = A.*sin(2*pi*Fp*(0:49999)./Fs+pi/2)';
+% qpath = quantizer('fixed','round','saturate',[24,15]);
+% rawECG = int32(quantize(qpath,rawECG).*2^15);
 
 F_delay = 250;
 B_delay = 5;
@@ -25,13 +25,13 @@ rrs_amplitude = single(0.0004);
 firCoeff1 = int32([firCoeff1(1:end-1); flipud(firCoeff1)]);
 firCoeff2 = int32([firCoeff2; flipud(firCoeff2)]);
 
-rrsOut = zeros(50000,1,'int32');
-filteredSig = zeros(50000,1,'int32');
+rrsOut = zeros(dataLen,1,'int32');
+filteredSig = zeros(dataLen,1,'int32');
 forwardBuf = zeros(bitshift(F_delay,1),1,'int32');
 backBuf = zeros(bitshift(B_delay,1),1,'int32');
 firBuf1 = zeros(21,1,'int32');
 firBuf2 = zeros(88,1,'int32');
-for i=1:50000
+for i=1:dataLen
    xSum = rawECG(i) - bitshift(forwardBuf(end-F_delay+1),1) + forwardBuf(end-bitshift(F_delay,1)+1);
    ySum = bitshift(backBuf(end-B_delay+1),1) - backBuf(end-bitshift(B_delay,1)+1);
    tmpOut = xSum + ySum;

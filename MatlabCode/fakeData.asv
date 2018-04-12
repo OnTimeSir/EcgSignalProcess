@@ -41,9 +41,9 @@ optim = 'Simple';  % Optimization Level
 [h, g] = ifir(L, 'low', [Fpass Fstop]/(Fn/2), [Dpass Dstop], optim);
 H = dsp.FIRFilter('Numerator', h);
 G = dsp.FIRFilter('Numerator', g);
-Hcascade = cascade(G,H);
-hfv = fvtool(Hcascade);
-hfv.Fs = Fn;
+% Hcascade = cascade(G,H);
+% hfv = fvtool(G,H,Hcascade);
+% hfv.Fs = Fn;
 
 q = 50;%45
 k = 5;
@@ -58,6 +58,9 @@ K = dsp.IIRFilter( ...
 
 hfv = fvtool(cascade(G,H,K));
 hfv.Fs = Fn;
+
+
+
 
 qpath = quantizer('fixed','round','saturate',[16,15]);
 fir_coeff1 = int16(quantize(qpath,g).*2^15);

@@ -12,14 +12,16 @@ int main()
 	OUTPUT_TYPE filteredEcgData[DATA_LENGTH] = { 0 };//输出结果
 
 	LPF_INTFC fir1Coeff[(FIR_1ST_LENGTH >> 1)] = { 0 };
-	LPF_INTFC fir2Coeff[(FIR_2ND_LENGTH >> 1) + 1] = { 0 };
+	LPF_INTFC fir2Coeff[(FIR_2ND_LENGTH >> 1)] = { 0 };
 	LPF_INTFC directFirCoeff[(LPF_LENGTH >> 1)] = { 0 };
 	QUEUE_ARRAY* rrsBuf1 = NULL;
 	QUEUE_ARRAY* rrsBuf2 = NULL;
 	QUEUE_ARRAY* ifirBuf1 = NULL;
 	QUEUE_ARRAY* ifirBuf2 = NULL;
-	QUEUE_ARRAY* directFirBuf = NULL;
 	NODE_INDEX* nodeIdx = NULL;
+
+	INPUT_TYPE forward, backward = 0;
+	QUEUE_ARRAY* directFirBuf = NULL;
 
 	INPUT_TYPE tmpOut = 0;
 
@@ -52,7 +54,7 @@ int main()
 	err = fopen_s(&fileIn3, "firCoeff2.dat", "rb");
 	if (err == 0)
 	{
-		fread(fir2Coeff, sizeof(LPF_INTFC), (FIR_2ND_LENGTH >> 1)+1, fileIn3);
+		fread(fir2Coeff, sizeof(LPF_INTFC), (FIR_2ND_LENGTH >> 1), fileIn3);
 		fclose(fileIn3);
 	}
 	else
@@ -78,20 +80,28 @@ int main()
 	rrsBuf2 = CreateQueue(RRS_BACKWARD_DELAY << 1);
 	ifirBuf1 = CreateQueue(FIR_1ST_LENGTH);
 	ifirBuf2 = CreateQueue(FIR_2ND_LENGTH* INTERP_FACTOR);
-	directFirBuf = CreateQueue(LPF_LENGTH);
 	nodeIdx = CreateNodeIdx();
+
+	directFirBuf = CreateQueue(LPF_LENGTH);
 
 	i = 0;
 	while (i < DATA_LENGTH)
 	{
-
+		//**************************
 		//高通&&陷波
-		//tmpOut = RrsFilter(inputData, rrsBuf1, rrsBuf2, nodeIdx);
 		tmpOut = RrsFilterFloatAmp(rawEcgData[i], rrsBuf1, rrsBuf2, nodeIdx);
+		//tmpOut = RrsFilter(rawEcgData[i], rrsBuf1, rrsBuf2, nodeIdx);
 
 		//低通
 		tmpOut = IfirFliter(tmpOut, ifirBuf1, ifirBuf2, fir1Coeff, fir2Coeff);
+
+
+		//**************************
+		//高通
+		//tmpOut = iirFliter(rawEcgData[i], &forward, &backward);
+		//低通
 		//tmpOut = firFliter(tmpOut, directFirBuf, directFirCoeff);
+
 
 		//取16位输出，溢出保护
 		tmpOut = tmpOut >> (INPUT_FRECTION_BIT - OUTPUT_FRECTION_BIT);

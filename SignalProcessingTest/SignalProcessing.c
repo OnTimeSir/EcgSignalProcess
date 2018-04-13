@@ -120,13 +120,13 @@ INPUT_TYPE IfirFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff1, QUEUE_ARRAY* b
 		}
 		idx = (idx + buff1->maxSize - 1) % buff1->maxSize;
 	}
-	tmpOut = (INPUT_TYPE)(tmpRst >> FIR_COEFF_FRECTION_BIT);
+	tmpOut = (INPUT_TYPE)(tmpRst >> FILT_COEFF_FRECTION_BIT);
 
 	tmpRst = 0;
 	idx = buff2->rear;
 	for (i = 0; i < FIR_2ND_LENGTH; i++)
 	{
-		if (i < (FIR_2ND_LENGTH >> 1) + 1)
+		if (i < (FIR_2ND_LENGTH >> 1) )
 		{
 			tmpRst += buff2->array[idx] * coeff2[i];
 		}
@@ -136,7 +136,7 @@ INPUT_TYPE IfirFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff1, QUEUE_ARRAY* b
 		}
 		idx = (idx + buff2->maxSize - INTERP_FACTOR) % buff2->maxSize;
 	}
-	outPut = (INPUT_TYPE)(tmpRst >> FIR_COEFF_FRECTION_BIT);
+	outPut = (INPUT_TYPE)(tmpRst >> FILT_COEFF_FRECTION_BIT);
 
 	RefreshQueue(buff1, input);
 	RefreshQueue(buff2, tmpOut);
@@ -164,8 +164,16 @@ INPUT_TYPE firFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff, const LPF_INTFC*
 		}
 		idx = (idx + buff->maxSize - 1) % buff->maxSize;
 	}
-	outPut = (INPUT_TYPE)(tmpRst >> FIR_COEFF_FRECTION_BIT);
+	outPut = (INPUT_TYPE)(tmpRst >> FILT_COEFF_FRECTION_BIT);
 	RefreshQueue(buff, input);
 	return outPut;
 }
 
+INPUT_TYPE iirFliter(const INPUT_TYPE input, INPUT_TYPE* forward, INPUT_TYPE* backward)
+{
+	INPUT_TYPE outPut = 0;
+	outPut = input - (*forward) + ((*backward*HPF_COEFF) >> FILT_COEFF_FRECTION_BIT);
+	*forward = input;
+	*backward = outPut;
+	return outPut;
+}

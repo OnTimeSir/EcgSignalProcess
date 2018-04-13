@@ -7,15 +7,16 @@
 #define RRS_SHIFT_LENGTH 12
 #define RRS_AMPLITUDE 0.0004f //0.0004938272f 
 
-#define FIR_1ST_LENGTH 20
-#define FIR_2ND_LENGTH 31
+#define FIR_1ST_LENGTH 10
+#define FIR_2ND_LENGTH 34
 #define INTERP_FACTOR 2
 
-#define LPF_LENGTH 72
+#define HPF_COEFF 16139
+#define LPF_LENGTH 96
 
 #define INPUT_FRECTION_BIT 12
 #define OUTPUT_FRECTION_BIT 10 
-#define FIR_COEFF_FRECTION_BIT 15
+#define FILT_COEFF_FRECTION_BIT 14
 
 #define OUTPUT_MAX_VALUE 32767
 #define OUTPUT_MIN_VALUE -32768
@@ -57,7 +58,7 @@ INPUT_TYPE IfirFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff1, QUEUE_ARRAY* b
 INPUT_TYPE firFliter(const INPUT_TYPE input, QUEUE_ARRAY* buff, const LPF_INTFC* coeff);
 
 //iir Direct-II (1-order)
-
+INPUT_TYPE iirFliter(const INPUT_TYPE input, INPUT_TYPE* forward, INPUT_TYPE* backward);
 
 QUEUE_ARRAY *CreateQueue(WORD max);
 void RefreshQueue(QUEUE_ARRAY *queue, ElementType data);
